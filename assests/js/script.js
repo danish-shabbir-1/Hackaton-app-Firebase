@@ -12,6 +12,7 @@ import {
   doc,
   addDoc,
   setDoc,
+  getDocs,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -31,20 +32,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 let uid;
+let idUserName;
+let userNameForAdd  = document.getElementById("userName")
+
+
+/////////////// on auth stage change ///////////////////
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    if (!window.location.href.includes("dashboard")) {
-      window.location.href = "dashboard.html";
-      window.location = "dashboard.html";
-    }
     console.log("user login");
     uid = user.uid;
 
     let ref = doc(db,'userInfo', uid)
     let userInfoData = await getDoc(ref)
-    console.log(userInfoData.data()) 
-    // ... 
+    idUserName = userInfoData.data().name
+    userNameForAdd.innerText = idUserName
+    getAllData()
   } else {
     console.log("user not login");
   }
@@ -65,6 +68,7 @@ logoutBtn?.addEventListener("click", (e) => {
 });
 
 /////////////// create user /////////////////
+
 const email = document.getElementById("SignUp-email");
 const userName = document.getElementById("SignUp-name");
 const pass = document.getElementById("SignUp-pass");
@@ -77,18 +81,16 @@ SignUpButton?.addEventListener("submit", (e) => {
     .then(async (userCredential) => {
       let user = userCredential.user;
 
-      const userInfo = {
-        Name: userName.value,
-        Email: email.value,
-        Pass: pass.value,
-      };
 
-      await setDoc(doc(db,'userInfo', uid),userInfo)
-
-      console.log(userInfo)
+      await setDoc(doc(db, 'userInfo', uid), {
+        name:userName.value,
+        userEmail:  email.value,
+          Pass: pass.value,
+    })
 
       alert("user create");
-      window.location = "login.html";
+            window.location.href = "dashboard.html";
+
       // ...
     })
     .catch((error) => {
@@ -99,7 +101,7 @@ SignUpButton?.addEventListener("submit", (e) => {
     });
 });
 
-///////////////// Login user ////////////////////////////
+///////////////// Login user /////////////////
 
 const Loginemail = document.getElementById("Login-email");
 const loginPass = document.getElementById("login-Pass");
@@ -112,7 +114,7 @@ loginButton?.addEventListener("submit", (e) => {
       // Signed up
       const user = userCredential.user;
       alert("user login");
-      window.location = "login.html";
+      window.location = "dashboard.html";
       // ...
     })
     .catch((error) => {
@@ -121,3 +123,49 @@ loginButton?.addEventListener("submit", (e) => {
       alert(errorMessage);
     });
 });
+
+///////////////// Add docc  /////////////////
+
+const blogTitle = document.getElementById("blog-title");
+const blogDetail = document.getElementById("blog-detail");
+const blogForm = document.getElementById("blog-form");
+const BlogContent = document.getElementById("Blog-Content");
+
+
+blogForm.addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+
+  const docRef = await addDoc(collection(db, "BlogsInfo"), {
+    title: blogTitle.value,
+    detail: blogDetail.value,
+    uid: uid
+  });
+  alert('blog was publish')
+  getAllData()
+  console.log("Document written with ID: ", docRef.id);
+})
+
+
+async function getAllData()  {
+  const querySnapshot = await getDocs(collection(db, "BlogsInfo"));
+  querySnapshot.forEach(async(Blog) => {
+
+    let dashBlogInfo = Blog.data()
+
+    console.log(dashBlogInfo);
+
+    let blogff = BlogContent.innerHTML += `
+    <div>
+     <h3>${idUserName}</h3>
+     <h4>${blogTitle.value}</h4>
+     <h6>${blogDetail.value}</h6>
+     <button> Delete </button>
+     <button> Edit </button>
+    </div>`;
+
+    blogff.appendChild(BlogContent)
+
+    
+  });
+}
