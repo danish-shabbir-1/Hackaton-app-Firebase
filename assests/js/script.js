@@ -13,7 +13,8 @@ import {
   addDoc,
   setDoc,
   getDocs,
-  getDoc
+  getDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -34,6 +35,7 @@ const db = getFirestore(app);
 let uid;
 let idUserName;
 let userNameForAdd  = document.getElementById("userName")
+let delBtn = delBtn
 
 
 /////////////// on auth stage change ///////////////////
@@ -42,9 +44,9 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     console.log("user login");
     uid = user.uid;
-    if (!window.location.href.includes('dashboard.html')) {
-      window.location.href = 'dashboard.html'
-    }
+    // if (!window.location.href.includes('dashboard.html')) {
+    //   window.location.href = 'dashboard.html'
+    // }
 
     let ref = doc(db,'userInfo', uid)
     let userInfoData = await getDoc(ref)
@@ -134,21 +136,26 @@ const blogDetail = document.getElementById("blog-detail");
 const blogForm = document.getElementById("blog-form");
 const BlogContent = document.getElementById("Blog-Content");
 
-
 blogForm.addEventListener('submit', async (e) => {
   e.preventDefault()
 
+  if (blogTitle || blogDetail === ' ') {
+    alert('enter any blog')
+  } else{
+    const docRef = await addDoc(collection(db, "BlogsInfo"), {
+      title: blogTitle.value,
+      detail: blogDetail.value,
+      uid: uid
+    });
+    alert('blog was publish')
+  }
 
-  const docRef = await addDoc(collection(db, "BlogsInfo"), {
-    title: blogTitle.value,
-    detail: blogDetail.value,
-    uid: uid
-  });
-  alert('blog was publish')
   console.log("Document written with ID: ", docRef.id);
   getAllData()
 })
 
+
+//////////////// Get all Data ////////////////
 
 async function getAllData()  {
   BlogContent.innerHTML = null;
@@ -162,10 +169,33 @@ async function getAllData()  {
      <h3>${idUserName}</h3>
      <h4>${dashBlogInfo.title}</h4>
      <h6>${dashBlogInfo.detail}</h6>
-     <button> Delete </button>
+     <button id="delBtn"> Delete </button>
      <button> Edit </button>
-    </div>`;
+    </div>`
 
-    
+    // const NAME = document.createElement('h3')
+    // NAME.innerText = idUserName
+    // const Btitle = document.createElement('h4')
+    // Btitle.innerText = dashBlogInfo.title
+    // const bdetail = document.createElement('h6')
+    // bdetail.innerText = dashBlogInfo.detail
+    //  delBtn = document.createElement('button')
+    // delBtn.innerText = "Delete"
+    // const editBtn = document.createElement('button')
+    // editBtn.innerText = 'Edit'
+
+    // BlogContent.appendChild(NAME)
+    // BlogContent.appendChild(Btitle)
+    // BlogContent.appendChild(bdetail)
+    // BlogContent.appendChild(delBtn)
+    // BlogContent.appendChild(editBtn)
+
   });
 }
+
+delBtn.addEventListener('click', (e) => {
+e.preventDefault()
+alert('dbkvbbeeq')
+})
+
+
