@@ -42,6 +42,9 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     console.log("user login");
     uid = user.uid;
+    if (!window.location.href.includes('dashboard.html')) {
+      window.location.href = 'dashboard.html'
+    }
 
     let ref = doc(db,'userInfo', uid)
     let userInfoData = await getDoc(ref)
@@ -142,29 +145,26 @@ blogForm.addEventListener('submit', async (e) => {
     uid: uid
   });
   alert('blog was publish')
-  getAllData()
   console.log("Document written with ID: ", docRef.id);
+  getAllData()
 })
 
 
 async function getAllData()  {
+  BlogContent.innerHTML = null;
   const querySnapshot = await getDocs(collection(db, "BlogsInfo"));
   querySnapshot.forEach(async(Blog) => {
 
     let dashBlogInfo = Blog.data()
 
-    console.log(dashBlogInfo);
-
-    let blogff = BlogContent.innerHTML += `
+    BlogContent.innerHTML += `
     <div>
      <h3>${idUserName}</h3>
-     <h4>${blogTitle.value}</h4>
-     <h6>${blogDetail.value}</h6>
+     <h4>${dashBlogInfo.title}</h4>
+     <h6>${dashBlogInfo.detail}</h6>
      <button> Delete </button>
      <button> Edit </button>
     </div>`;
-
-    blogff.appendChild(BlogContent)
 
     
   });
