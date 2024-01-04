@@ -35,7 +35,6 @@ const db = getFirestore(app);
 let uid;
 let idUserName;
 let userNameForAdd  = document.getElementById("userName")
-let delBtn = delBtn
 
 
 /////////////// on auth stage change ///////////////////
@@ -139,20 +138,21 @@ const BlogContent = document.getElementById("Blog-Content");
 blogForm.addEventListener('submit', async (e) => {
   e.preventDefault()
 
-  if (blogTitle || blogDetail === ' ') {
-    alert('enter any blog')
-  } else{
+  if (blogTitle === ' ' || blogDetail === ' ') {
+    alert('Enter any blog');
+  } else {
     const docRef = await addDoc(collection(db, "BlogsInfo"), {
       title: blogTitle.value,
       detail: blogDetail.value,
       uid: uid
     });
-    alert('blog was publish')
+    alert('Blog was published');
+    console.log("Document written with ID: ", docRef.id);
+    getAllData();
   }
-
-  console.log("Document written with ID: ", docRef.id);
-  getAllData()
 })
+
+
 
 
 //////////////// Get all Data ////////////////
@@ -165,14 +165,14 @@ async function getAllData()  {
     let dashBlogInfo = Blog.data()
 
     BlogContent.innerHTML += `
-    <div>
+    <div id=${Blog.id}>
      <h3>${idUserName}</h3>
      <h4>${dashBlogInfo.title}</h4>
      <h6>${dashBlogInfo.detail}</h6>
-     <button id="delBtn"> Delete </button>
+     <button onClick='detBtn(event)'> Delete </button>
      <button> Edit </button>
     </div>`
-
+    
     // const NAME = document.createElement('h3')
     // NAME.innerText = idUserName
     // const Btitle = document.createElement('h4')
@@ -193,9 +193,7 @@ async function getAllData()  {
   });
 }
 
-delBtn.addEventListener('click', (e) => {
-e.preventDefault()
-alert('dbkvbbeeq')
-})
-
-
+window.detBtn = async function(e) {
+  // console.log(e)
+  await deleteDoc(doc(db, "BlogsInfo", id));
+}
